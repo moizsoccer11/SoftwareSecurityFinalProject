@@ -24,6 +24,15 @@ public class SQLDatabase extends SQLiteOpenHelper {
     public static final String COLUMN_IMAGE = "image";
     public static final String COLUMN_CREATEDUSER = "createdUser";
 
+    // Table name and column names for SharedNotes
+    public static final String TABLE_SHARED_NOTES = "sharedNotes";
+    public static final String COLUMN_SHARED_KEY = "sharedKey";
+    public static final String COLUMN_SHARED_TITLE = "titleData";
+    public static final String COLUMN_SHARED_DESCRIPTION = "descriptionData";
+    public static final String COLUMN_SHARED_COLOR = "colorData";
+    public static final String COLUMN_SHARED_RECEIVER = "reciever";
+    public static final String COLUMN_SHARED_SENDER = "sender";
+
     // SQL statement to create the users table
     private static final String TABLE_USERS_CREATE =
             "CREATE TABLE " + TABLE_USERS + " (" +
@@ -43,21 +52,34 @@ public class SQLDatabase extends SQLiteOpenHelper {
                     COLUMN_CREATEDUSER + " TEXT" +
                     ");";
 
+    // SQL statement to create the sharedNotes table
+    private static final String TABLE_SHARED_NOTES_CREATE =
+            "CREATE TABLE " + TABLE_SHARED_NOTES + " (" +
+                    COLUMN_SHARED_KEY + " TEXT, " +
+                    COLUMN_SHARED_TITLE + " TEXT, " +
+                    COLUMN_SHARED_DESCRIPTION + " TEXT, " +
+                    COLUMN_SHARED_COLOR + " TEXT, " +
+                    COLUMN_SHARED_RECEIVER + " TEXT, " +
+                    COLUMN_SHARED_SENDER + " TEXT" +
+                    ");";
+
     public SQLDatabase(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
 
     @Override
     public void onCreate(SQLiteDatabase database) {
-        // Create both tables when the database is created
+        // Create all tables when the database is created
         database.execSQL(TABLE_USERS_CREATE);
         database.execSQL(TABLE_NOTES_CREATE);
+        database.execSQL(TABLE_SHARED_NOTES_CREATE);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_USERS);
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_NOTES);
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_SHARED_NOTES);
         onCreate(db);
     }
 }

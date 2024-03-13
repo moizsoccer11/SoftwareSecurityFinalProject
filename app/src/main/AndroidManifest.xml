@@ -41,6 +41,10 @@
             android:exported="true"
             >
         </activity>
+        <activity android:name=".SharedNotes"
+            android:exported="true"
+            >
+        </activity>
     </application>
 
 </manifest>
