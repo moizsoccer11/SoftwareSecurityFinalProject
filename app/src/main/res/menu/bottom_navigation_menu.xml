@@ -1,0 +1,14 @@
+<!-- res/menu/bottom_navigation_menu.xml -->
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/action_home"
+        android:title="Home"
+        android:icon="@drawable/home"
+         />
+
+    <item
+        android:id="@+id/action_shared"
+        android:title="Shared Notes"
+        android:icon="@drawable/item"
+         />
+</menu>

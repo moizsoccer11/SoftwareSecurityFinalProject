@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context=".NewNote">
+
+    <com.google.android.material.appbar.AppBarLayout
+        android:id = "@+id/toolBarContainerNewNote"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:fitsSystemWindows="true">
+
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            app:title="New Note"/>
+
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <EditText
+        android:id="@+id/inputTitle"
+        android:layout_width="300dp"
+        android:layout_height="50dp"
+        android:layout_below="@id/toolBarContainerNewNote"
+        android:layout_centerInParent="true"
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginEnd="10dp"
+        android:hint="Title"
+        android:paddingTop="10dp" />
+
+    <EditText
+        android:id="@+id/inputDescription"
+        android:layout_width="300dp"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/inputTitle"
+        android:layout_centerInParent="true"
+        android:gravity="top"
+        android:hint="Description"
+        android:lines="10"
+        android:paddingTop="10dp" />
+
+    <ImageView
+        android:id="@+id/yellowNote"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_centerInParent="true"
+        android:src="@drawable/yellowrect"
+        android:layout_below="@id/inputDescription"
+        android:layout_marginTop="5dp"
+        android:onClick="yellowNoteOnClick"/>
+    <ImageView
+        android:id="@+id/orangeNote"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_centerInParent="true"
+        android:src="@drawable/orangerect"
+        android:layout_below="@id/inputDescription"
+        android:layout_marginTop="5dp"
+        android:layout_toLeftOf="@id/yellowNote"
+        android:layout_marginRight="15dp"
+        android:onClick="orangeNoteOnClick"/>
+
+    <ImageView
+        android:id="@+id/blueNote"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_centerInParent="true"
+        android:src="@drawable/bluerect"
+        android:layout_below="@id/inputDescription"
+        android:layout_marginTop="5dp"
+        android:layout_toRightOf="@id/yellowNote"
+        android:layout_marginLeft="15dp"
+        android:onClick="blueNoteOnClick"
+        />
+    <!-- Upload Image Button -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/uploadImageBtn"
+        android:layout_width="150dp"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/blueNote"
+        android:layout_marginLeft="50dp"
+        android:layout_marginTop="20dp"
+        android:text="Upload Image"
+        android:onClick="uploadImageOnClick"
+        >
+    </com.google.android.material.button.MaterialButton>
+    <!-- Capture Photo button -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/capturePhotoBtn"
+        android:layout_width="150dp"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/blueNote"
+        android:layout_toRightOf="@id/uploadImageBtn"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="50dp"
+        android:layout_marginTop="20dp"
+        android:text="Capture Photo"
+        android:onClick="capturePhotoOnClick"
+        >
+    </com.google.android.material.button.MaterialButton>
+
+    <!-- Save Note button -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/saveNoteBtn"
+        android:layout_width="150dp"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/uploadImageBtn"
+        android:layout_marginLeft="50dp"
+        android:layout_marginTop="20dp"
+        android:onClick="saveNoteOnClick"
+        android:text="Save Note"></com.google.android.material.button.MaterialButton>
+
+    <!-- Cancel button -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/cancelBtn"
+        android:layout_width="150dp"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/capturePhotoBtn"
+        android:layout_toRightOf="@id/saveNoteBtn"
+        android:layout_marginRight="50dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginTop="20dp"
+        android:text="Cancel"
+        android:onClick="cancelOnClick"
+        >
+    </com.google.android.material.button.MaterialButton>
+
+
+    <ImageView
+        android:id="@+id/imageDisplay"
+        android:layout_width="250dp"
+        android:layout_height="100dp"
+        android:layout_below="@id/saveNoteBtn"
+        android:layout_centerInParent="true"
+        android:layout_marginTop="30dp">
+
+    </ImageView>
+
+
+
+</RelativeLayout>
