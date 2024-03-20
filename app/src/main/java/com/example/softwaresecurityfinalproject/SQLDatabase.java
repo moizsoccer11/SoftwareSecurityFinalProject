@@ -19,6 +19,7 @@ public class SQLDatabase extends SQLiteOpenHelper {
     public static final String TABLE_NOTES = "notes";
     public static final String COLUMN_ID = "_id";
     public static final String COLUMN_TITLE = "title";
+    public static final String COLUMN_KEY = "notekey";
     public static final String COLUMN_DESCRIPTION = "description";
     public static final String COLUMN_NOTECOLOR = "noteColor";
     public static final String COLUMN_IMAGE = "image";
@@ -27,6 +28,7 @@ public class SQLDatabase extends SQLiteOpenHelper {
     // Table name and column names for SharedNotes
     public static final String TABLE_SHARED_NOTES = "sharedNotes";
     public static final String COLUMN_SHARED_KEY = "sharedKey";
+    public static final String COLUMN_SHARED_ID = "sharedNoteId";
     public static final String COLUMN_SHARED_TITLE = "titleData";
     public static final String COLUMN_SHARED_DESCRIPTION = "descriptionData";
     public static final String COLUMN_SHARED_COLOR = "colorData";
@@ -46,6 +48,7 @@ public class SQLDatabase extends SQLiteOpenHelper {
             "CREATE TABLE " + TABLE_NOTES + " (" +
                     COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                     COLUMN_TITLE + " TEXT, " +
+                    COLUMN_KEY + " TEXT, " +
                     COLUMN_DESCRIPTION + " TEXT, " +
                     COLUMN_NOTECOLOR + " TEXT, " +
                     COLUMN_IMAGE + " BLOB, " +
@@ -56,6 +59,7 @@ public class SQLDatabase extends SQLiteOpenHelper {
     private static final String TABLE_SHARED_NOTES_CREATE =
             "CREATE TABLE " + TABLE_SHARED_NOTES + " (" +
                     COLUMN_SHARED_KEY + " TEXT, " +
+                    COLUMN_SHARED_ID + " TEXT, " +
                     COLUMN_SHARED_TITLE + " TEXT, " +
                     COLUMN_SHARED_DESCRIPTION + " TEXT, " +
                     COLUMN_SHARED_COLOR + " TEXT, " +

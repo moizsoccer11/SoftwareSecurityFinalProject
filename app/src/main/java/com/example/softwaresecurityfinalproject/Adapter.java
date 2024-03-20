@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.SQLException;
 import android.graphics.Color;
+import android.util.Base64;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -23,6 +24,10 @@ import org.w3c.dom.Text;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+
+import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
 
 public class Adapter extends RecyclerView.Adapter<Adapter.MyViewHolder>{
 
@@ -48,7 +53,7 @@ public class Adapter extends RecyclerView.Adapter<Adapter.MyViewHolder>{
         holder.titleOutput.setText(note.getTitle());
         holder.descriptionOutput.setText(note.getDescription());
         holder.itemView.setBackgroundColor(Color.parseColor(note.getNoteColor().toString()));
-        // Set the AuctionItem for the ViewHolder
+        // Set the note for the ViewHolder
         holder.setNote(note);
         //When Click the Note itself
         holder.itemView.setOnClickListener(new View.OnClickListener() {
@@ -56,10 +61,7 @@ public class Adapter extends RecyclerView.Adapter<Adapter.MyViewHolder>{
             public void onClick(View v) {
                //intent to go to EditNote page
                 Intent intent = new Intent(context,EditNote.class);
-                intent.putExtra("note_id", note.getId());
-                intent.putExtra("note_title", note.getTitle());
-                intent.putExtra("note_description", note.getDescription());
-                intent.putExtra("note_color", note.getNoteColor());
+                intent.putExtra("note_object", note);
                 context.startActivity(intent);
             }
         });
@@ -76,18 +78,30 @@ public class Adapter extends RecyclerView.Adapter<Adapter.MyViewHolder>{
 
         ImageView deleteBtn;
 
+        ImageView shareNoteBtn;
+
         private Note note;
         public MyViewHolder(@NonNull View itemView) {
             super(itemView);
             titleOutput = itemView.findViewById(R.id.noteTitle);
             descriptionOutput = itemView.findViewById(R.id.noteDescription);
             deleteBtn = itemView.findViewById(R.id.deleteBtn);
+            shareNoteBtn = itemView.findViewById(R.id.shareBtn);
+
+            //On Click Functions:
             deleteBtn.setOnClickListener(v -> openDeleteModal());
+            shareNoteBtn.setOnClickListener(v -> {
+                try {
+                    openShareModal();
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            });
         }
         public void setNote(Note note) {
             this.note = note;
         }
-        public void openDeleteModal(){
+        private void openDeleteModal(){
             AlertDialog.Builder builder = new AlertDialog.Builder(itemView.getContext());
             View deleteModalView = LayoutInflater.from(itemView.getContext()).inflate(R.layout.modal, null);
             // Find views in ModalView
@@ -122,6 +136,24 @@ public class Adapter extends RecyclerView.Adapter<Adapter.MyViewHolder>{
                 }
             });
             btnCancel.setOnClickListener(v -> {
+                // Dismiss the dialog
+                dialog.dismiss();
+            });
+        }
+        private void openShareModal() throws Exception {
+            AlertDialog.Builder builder = new AlertDialog.Builder(itemView.getContext());
+            View shareModalView = LayoutInflater.from(itemView.getContext()).inflate(R.layout.sharemodal, null);
+            // Find views in ModalView
+            TextView sharedKey = shareModalView.findViewById(R.id.textViewShareToken);
+            Button closeBtn = shareModalView.findViewById(R.id.btnClose);
+            //Create Dialog
+            builder.setView(shareModalView);
+            AlertDialog dialog = builder.create(); // Create the dialog instance
+            dialog.show();
+            //Display Key of the note to user to share
+            sharedKey.setText(note.getKey());
+            //onClick Functions
+            closeBtn.setOnClickListener(v -> {
                 // Dismiss the dialog
                 dialog.dismiss();
             });

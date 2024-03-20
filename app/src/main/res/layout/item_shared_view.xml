@@ -14,7 +14,7 @@
         android:id="@+id/noteTitle"
         android:textSize="20dp"
         android:textColor="@color/black"
-        tools:text="Note Title">
+        tools:text="Shared Note">
 
     </TextView>
 
@@ -29,21 +29,12 @@
     </TextView>
 
     <ImageView
-        android:id="@+id/shareBtn"
-        android:layout_width="86dp"
-        android:layout_height="wrap_content"
-        android:layout_toLeftOf="@id/deleteBtn"
-        android:layout_marginRight="-8dp"
-        android:src="@android:drawable/ic_menu_send">
-
-    </ImageView>
-    <ImageView
         android:id="@+id/deleteBtn"
         android:layout_width="86dp"
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
         android:layout_marginRight="-8dp"
-        android:src="@android:drawable/ic_menu_delete">
+        android:src="@android:drawable/ic_menu_view">
 
     </ImageView>
 

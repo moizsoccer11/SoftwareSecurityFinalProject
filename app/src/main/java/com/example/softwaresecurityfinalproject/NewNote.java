@@ -4,8 +4,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.util.Base64;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -14,6 +17,9 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import java.io.ByteArrayOutputStream;
+
+import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
 
 public class NewNote extends AppCompatActivity {
     User user;
@@ -77,7 +83,7 @@ public class NewNote extends AppCompatActivity {
         currentNoteColor="#FFA500";
     }
 
-    public void saveNoteOnClick(View v){
+    public void saveNoteOnClick(View v) throws Exception {
         Context context = this; //Activity context
         //Open Database to access
         DatabaseServices dataSource = new DatabaseServices(context); // Initialize the data source
@@ -87,10 +93,18 @@ public class NewNote extends AppCompatActivity {
         EditText description = findViewById(R.id.inputDescription);
         String titleText = title.getText().toString();
         String descriptionText= description.getText().toString();
+        ImageView imageView = findViewById(R.id.imageDisplay);
+        //Get Image if there is one
+        Bitmap bm = null;
+        // Encrypt image
+        if (imageView.getDrawable() != null) {
+            // Retrieve image and convert to byte array
+            bm = ((BitmapDrawable) imageView.getDrawable()).getBitmap();
+        }
         //Get Associated username
         String userName = user.getUsername();
         //Create note
-        Note newNote = new Note(titleText, descriptionText,currentNoteColor, userName);
+        Note newNote = new Note(titleText, descriptionText,currentNoteColor, userName, bm);
         //Insert note into database
         long noteId = dataSource.insertNote(newNote);
         //Make a toast since note created

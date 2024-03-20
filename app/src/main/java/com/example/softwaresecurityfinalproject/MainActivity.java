@@ -59,6 +59,9 @@ public class MainActivity extends AppCompatActivity {
         } catch (SQLException e) {
             Log.e("YourTag", "Error message", e);
         }
+        catch (Exception e) {
+            throw new RuntimeException(e);
+        }
         //Initialize TextView
         TextView noItemsTextView = findViewById(R.id.noItemsTextView);
         // Initialize RecyclerView

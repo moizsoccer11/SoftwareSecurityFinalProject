@@ -1,6 +1,7 @@
 package com.example.softwaresecurityfinalproject;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -13,30 +14,31 @@ import androidx.appcompat.app.AppCompatActivity;
 
 public class EditNote extends AppCompatActivity {
     private static final int PICK_IMAGE_REQUEST = 1;
-    long noteId;
+    Note note;
     String currentNoteColor; // current note color
+    Bitmap image;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_editnote);
 
         // Retrieve note details from intent extras
-        noteId = getIntent().getLongExtra("note_id", 0);
-        String noteTitle = getIntent().getStringExtra("note_title");
-        String noteDescription = getIntent().getStringExtra("note_description");
-        String noteColor = getIntent().getStringExtra("note_color");
-
+        Intent intent = getIntent();
+        if (intent.hasExtra("note_object")) {
+            Note recievedNote = (Note) intent.getSerializableExtra("note_object");
+            note= recievedNote;
+        }
         //Set the note details
         //Set up the resources
         EditText title = findViewById(R.id.editInputTitle);
         EditText description = findViewById(R.id.editInputDescription);
         //Set default color selected to be YELLOW
-        title.setBackgroundColor(Color.parseColor(noteColor));
-        description.setBackgroundColor(Color.parseColor(noteColor));
-        currentNoteColor = noteColor;
+        title.setBackgroundColor(Color.parseColor(note.getNoteColor()));
+        description.setBackgroundColor(Color.parseColor(note.getNoteColor()));
+        currentNoteColor = note.getNoteColor();
         //Set text details
-        title.setText(noteTitle);
-        description.setText(noteDescription);
+        title.setText(note.getTitle());
+        description.setText(note.getDescription());
 
 
     }
@@ -69,7 +71,7 @@ public class EditNote extends AppCompatActivity {
         currentNoteColor="#FFA500";
     }
 
-    public void editSaveNoteOnClick(View v){
+    public void editSaveNoteOnClick(View v) throws Exception {
         Context context = this; //Activity context
         //Open Database to access
         DatabaseServices dataSource = new DatabaseServices(context); // Initialize the data source
@@ -80,7 +82,7 @@ public class EditNote extends AppCompatActivity {
         String titleText = title.getText().toString();
         String descriptionText= description.getText().toString();
         //Create note
-        Note newNote = new Note(titleText, descriptionText,currentNoteColor, noteId);
+        Note newNote = new Note(titleText, descriptionText,currentNoteColor, note.getId(), note.getKey());
         //Insert note into database
         dataSource.updateNote(newNote);
         //Make a toast since note created

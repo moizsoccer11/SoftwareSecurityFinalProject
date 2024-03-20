@@ -55,11 +55,13 @@ public class SharedNotes extends AppCompatActivity {
             dataSource.close();
         } catch (SQLException e) {
             Log.e("YourTag", "Error message", e);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
         //Initialize TextView
         TextView noItemsTextView = findViewById(R.id.noItemsTextView);
         // Initialize RecyclerView
-        RecyclerView recyclerView = findViewById(R.id.recyclerViewNoteItems);
+        RecyclerView recyclerView = findViewById(R.id.recyclerViewSharedNoteItems);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         // Check if there are no auction items
         if (noteItemList.isEmpty()) {

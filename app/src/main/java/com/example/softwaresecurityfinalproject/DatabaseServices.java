@@ -5,9 +5,26 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Bitmap;
+import android.util.Base64;
+import android.util.Log;
 
+import java.io.ByteArrayOutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+
+import javax.crypto.Cipher;
+import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
+import java.security.Key;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 
 public class DatabaseServices {
     private SQLiteDatabase database;
@@ -28,21 +45,33 @@ public class DatabaseServices {
     //Functions to interact with database
 
     //Function to insert note into database
-    public long insertNote(Note note) {
+    public long insertNote(Note note) throws Exception {
+        String secretKeyToEncryptKeys = "iFCl+uFzjeW7Dk5aId0DfX0Mykru8KeE7aNim+2FKsM=";
+        //Create Key
+        // Generate a new key for each note
+        KeyGenerator keyGen = KeyGenerator.getInstance("AES");
+        keyGen.init(256);
+        SecretKey noteKey = keyGen.generateKey();
+        //Store encrypted data in DB
         ContentValues values = new ContentValues();
-        values.put(SQLDatabase.COLUMN_TITLE, note.getTitle());
-        values.put(SQLDatabase.COLUMN_DESCRIPTION, note.getDescription());
-        values.put(SQLDatabase.COLUMN_NOTECOLOR, note.getNoteColor());
+        values.put(SQLDatabase.COLUMN_TITLE, encrypt(note.getTitle(),noteKey));
+        values.put(SQLDatabase.COLUMN_DESCRIPTION, encrypt(note.getDescription(),noteKey));
+        values.put(SQLDatabase.COLUMN_NOTECOLOR, encrypt(note.getNoteColor(),noteKey));
         values.put(SQLDatabase.COLUMN_CREATEDUSER, note.getCreatedUser());
+        values.put(SQLDatabase.COLUMN_KEY, encrypt(Base64.encodeToString(noteKey.getEncoded(), Base64.NO_WRAP),convertStringKeytoSecretKey(secretKeyToEncryptKeys)));   // //Base64.encodeToString(noteKey.getEncoded(), Base64.NO_WRAP)
+        //If image given than store as well
+        if(note.getImage() != null){
+            values.put(SQLDatabase.COLUMN_IMAGE, bitmapToByteArray(note.getImage()));
+        }
         return database.insert(SQLDatabase.TABLE_NOTES, null, values);
     }
 
     //Function to update note
-    public int updateNote(Note note) {
+    public int updateNote(Note note) throws Exception {
         ContentValues values = new ContentValues();
-        values.put(SQLDatabase.COLUMN_TITLE, note.getTitle());
-        values.put(SQLDatabase.COLUMN_DESCRIPTION, note.getDescription());
-        values.put(SQLDatabase.COLUMN_NOTECOLOR, note.getNoteColor());
+        values.put(SQLDatabase.COLUMN_TITLE, encrypt(note.getTitle(),convertStringKeytoSecretKey(note.getKey())));
+        values.put(SQLDatabase.COLUMN_DESCRIPTION, encrypt(note.getDescription(),convertStringKeytoSecretKey(note.getKey())));
+        values.put(SQLDatabase.COLUMN_NOTECOLOR, encrypt(note.getNoteColor(),convertStringKeytoSecretKey(note.getKey())));
         return database.update(
                 SQLDatabase.TABLE_NOTES,
                 values,
@@ -58,33 +87,8 @@ public class DatabaseServices {
                 new String[]{String.valueOf(noteId)}
         );
     }
-    //Function to get all notes
-    public List<Note> getAllNotes() {
-        List<Note> notes = new ArrayList<>();
-        Cursor cursor = database.query(
-                SQLDatabase.TABLE_NOTES,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null
-        );
-
-        if (cursor != null) {
-            cursor.moveToFirst();
-            while (!cursor.isAfterLast()) {
-                Note note = cursorToNote(cursor);
-                notes.add(note);
-                cursor.moveToNext();
-            }
-            cursor.close();
-        }
-
-        return notes;
-    }
     //Get all notes associated with the current user
-    public List<Note> getAllNotesForAssociatedUser(String username) {
+    public List<Note> getAllNotesForAssociatedUser(String username) throws Exception {
         List<Note> items = new ArrayList<>();
         String selection = SQLDatabase.COLUMN_CREATEDUSER + " = ?";
         String[] selectionArgs = { username };
@@ -102,8 +106,20 @@ public class DatabaseServices {
         if (cursor != null) {
             cursor.moveToFirst();
             while (!cursor.isAfterLast()) {
-                Note item = cursorToNote(cursor);
-                items.add(item);
+                Note note = cursorToNote(cursor);
+                //Before Adding note to List, decrypt all data
+                String secretKeyToEncryptKeys ="iFCl+uFzjeW7Dk5aId0DfX0Mykru8KeE7aNim+2FKsM=";      //"ez+oEESta+NC1k4pU4uYSSZK/DR9wfbKs/BvHSXR9Yw=";
+                //First decrypt key to decrypt rest of data
+                String decryptedStringKeyOfNote = new String(decrypt(note.getKey(), convertStringKeytoSecretKey(secretKeyToEncryptKeys)),StandardCharsets.UTF_8);
+                //Convert to secret key
+                SecretKey key = convertStringKeytoSecretKey(decryptedStringKeyOfNote); //note.getKey()
+                //Decrypt all data
+                String title = new String(decrypt(note.getTitle(),key), StandardCharsets.UTF_8);
+                String desc = new String(decrypt(note.getDescription(),key), StandardCharsets.UTF_8);
+                String color = new String(decrypt(note.getNoteColor(),key), StandardCharsets.UTF_8);
+                String createdBy = note.getCreatedUser();
+                Note decrpytedNote = new Note(title,desc,color,createdBy,decryptedStringKeyOfNote);
+                items.add(decrpytedNote);
                 cursor.moveToNext();
             }
             cursor.close();
@@ -141,7 +157,84 @@ public class DatabaseServices {
         note.setTitle(cursor.getString(cursor.getColumnIndex(SQLDatabase.COLUMN_TITLE)));
         note.setDescription(cursor.getString(cursor.getColumnIndex(SQLDatabase.COLUMN_DESCRIPTION)));
         note.setNoteColor(cursor.getString(cursor.getColumnIndex(SQLDatabase.COLUMN_NOTECOLOR)));
-        note.setNoteColor(cursor.getString(cursor.getColumnIndex(SQLDatabase.COLUMN_NOTECOLOR)));
+        note.setKey(cursor.getString(cursor.getColumnIndex(SQLDatabase.COLUMN_KEY)));
         return note;
+    }
+
+    //Encrpytion and Decrptyion, Shared Notes Table Actions
+    public long insertSharedNote(Note note, SecretKey key, String stringkey) throws Exception {
+        //Encrpyt all Note values
+        String secretKeyToEncryptKeys = "ez+oEESta+NC1k4pU4uYSSZK/DR9wfbKs/BvHSXR9Yw=";
+        ContentValues values = new ContentValues();
+        values.put(SQLDatabase.COLUMN_SHARED_ID, encrypt(String.valueOf(note.getId()),key));
+        values.put(SQLDatabase.COLUMN_SHARED_TITLE, encrypt(note.getTitle(),key));
+        values.put(SQLDatabase.COLUMN_SHARED_DESCRIPTION, encrypt(note.getDescription(),key));
+        values.put(SQLDatabase.COLUMN_SHARED_COLOR, encrypt(note.getNoteColor(),key));
+        values.put(SQLDatabase.COLUMN_SHARED_KEY, encrypt(stringkey,convertStringKeytoSecretKey(secretKeyToEncryptKeys)));
+        return database.insert(SQLDatabase.TABLE_SHARED_NOTES, null, values);
+    }
+    public SecretKey convertStringKeytoSecretKey(String key){
+        byte[] secretKeyByteFormat = Base64.decode(key, Base64.DEFAULT);
+        SecretKey originalKey = new SecretKeySpec(secretKeyByteFormat, "AES");
+        return originalKey;
+    }
+    public byte[] imgEnc(byte[] image, SecretKey key) throws Exception {
+        // Initialize cipher
+        Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5PADDING");
+        cipher.init(Cipher.ENCRYPT_MODE, key);
+        byte[] iv = cipher.getIV();
+        byte[] ciphertext = cipher.doFinal(image);
+
+        // Combine IV and ciphertext arrays
+        byte[] encryption = new byte[iv.length + ciphertext.length];
+        System.arraycopy(iv, 0, encryption, 0, iv.length);
+        System.arraycopy(ciphertext, 0, encryption, iv.length, ciphertext.length);
+        return encryption;
+    }
+    public byte[] imgDec(byte[] image, SecretKey key) throws Exception {
+        Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5PADDING");
+
+        // Get IV and ciphertext from combined array
+        byte[] iv = Arrays.copyOfRange(image, 0, 16);
+        byte[] ct = Arrays.copyOfRange(image, 16, image.length);
+
+        cipher.init(Cipher.DECRYPT_MODE, key, new IvParameterSpec(iv));
+        return cipher.doFinal(ct);
+    }
+
+    // Encrypt using CBC and PKCS5Padding
+    public String encrypt(String plaintext, SecretKey key) throws Exception {
+        // Initialize cipher
+        Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5PADDING");
+        cipher.init(Cipher.ENCRYPT_MODE, key);
+        byte[] iv = cipher.getIV();
+        byte[] ciphertext = cipher.doFinal(plaintext.getBytes(StandardCharsets.UTF_8));
+
+        // Combine IV and ciphertext arrays
+        byte[] encryption = new byte[iv.length + ciphertext.length];
+        System.arraycopy(iv, 0, encryption, 0, iv.length);
+        System.arraycopy(ciphertext, 0, encryption, iv.length, ciphertext.length);
+
+        return Base64.encodeToString(encryption, Base64.NO_WRAP);
+    }
+
+    // Decrypt using the inputs given from encryption
+    // Decrypt using the inputs given from encryption
+    public byte[] decrypt(String ciphertext, SecretKey key) throws Exception {
+        Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5PADDING");
+
+        // Get IV and ciphertext from combined array
+        byte[] encryption = Base64.decode(ciphertext, Base64.NO_WRAP);
+        byte[] iv = Arrays.copyOfRange(encryption, 0, 16);
+        byte[] ct = Arrays.copyOfRange(encryption, 16, encryption.length);
+
+        cipher.init(Cipher.DECRYPT_MODE, key, new IvParameterSpec(iv));
+        return cipher.doFinal(ct);
+    }
+
+    public byte[] bitmapToByteArray(Bitmap bm) {
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        bm.compress(Bitmap.CompressFormat.PNG, 100, stream);
+        return stream.toByteArray();
     }
 }
