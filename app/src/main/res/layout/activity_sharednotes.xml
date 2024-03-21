@@ -79,6 +79,16 @@
         android:text="No Shared Notes..."
         android:visibility="gone"/>
 
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/newSharedNoteFAB"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:clickable="true"
+        android:onClick="newSharedFABOnClick"
+        app:srcCompat="@android:drawable/ic_menu_add"
+        android:layout_above="@id/bottomNavigationView"
+        android:layout_alignParentRight="true"
+        android:layout_margin="10dp"/>
 
     <!-- Bottom Navigation View -->
     <com.google.android.material.bottomnavigation.BottomNavigationView

@@ -1,0 +1,54 @@
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/textViewModalTitle"
+        android:text="Enter the shared token:"
+        android:textSize="24sp"
+        android:textAlignment="center"
+        android:layout_marginBottom="15dp"
+        android:textColor="@color/black">
+    </TextView>
+
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/tokenInput"
+        android:hint="Enter Token here..."
+        android:textSize="18sp"
+        android:textAlignment="center"
+        android:layout_marginBottom="15dp"
+        android:textColor="@color/black">
+    </EditText>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/tokenError"
+        android:text="The token entered is incorrect"
+        android:visibility="gone"
+        android:textSize="18sp"
+        android:textColor="@color/red"
+        android:textAlignment="center"
+        android:layout_marginBottom="15dp">
+    </TextView>
+
+
+    <Button
+        android:id="@+id/btnTokenSubmit"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Submit"/>
+    <Button
+        android:id="@+id/btnTokenClose"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Close"/>
+
+</LinearLayout>

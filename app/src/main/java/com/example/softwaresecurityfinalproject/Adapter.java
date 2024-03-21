@@ -33,10 +33,12 @@ public class Adapter extends RecyclerView.Adapter<Adapter.MyViewHolder>{
 
     private Context context;
     private List<Note> noteList;
+    private User user;
 
-    public Adapter(Context context, List<Note> noteList){
+    public Adapter(Context context, List<Note> noteList, User user){
         this.context=context;
         this.noteList=noteList;
+        this.user = user;
     }
 
     @NonNull
@@ -62,6 +64,7 @@ public class Adapter extends RecyclerView.Adapter<Adapter.MyViewHolder>{
                //intent to go to EditNote page
                 Intent intent = new Intent(context,EditNote.class);
                 intent.putExtra("note_object", note);
+                intent.putExtra("user_object", user);
                 context.startActivity(intent);
             }
         });

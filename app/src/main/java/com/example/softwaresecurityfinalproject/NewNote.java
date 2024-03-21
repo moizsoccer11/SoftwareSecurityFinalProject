@@ -95,11 +95,12 @@ public class NewNote extends AppCompatActivity {
         String descriptionText= description.getText().toString();
         ImageView imageView = findViewById(R.id.imageDisplay);
         //Get Image if there is one
-        Bitmap bm = null;
+        byte[] bm = null;
         // Encrypt image
         if (imageView.getDrawable() != null) {
             // Retrieve image and convert to byte array
-            bm = ((BitmapDrawable) imageView.getDrawable()).getBitmap();
+           // bm = ((BitmapDrawable) imageView.getDrawable()).getBitmap();
+            bm = imageViewToByteArray(imageView);
         }
         //Get Associated username
         String userName = user.getUsername();
@@ -150,4 +151,11 @@ public class NewNote extends AppCompatActivity {
         Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
         startActivityForResult(intent, PICK_IMAGE_REQUEST);
     }
+    public byte[] imageViewToByteArray(ImageView imageView) {
+        Bitmap bitmap = ((BitmapDrawable) imageView.getDrawable()).getBitmap();
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
+        return stream.toByteArray();
+    }
+
 }

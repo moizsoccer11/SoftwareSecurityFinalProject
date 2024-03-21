@@ -10,5 +10,5 @@
         android:id="@+id/action_shared"
         android:title="Shared Notes"
         android:icon="@drawable/item"
-         />
+        />
 </menu>

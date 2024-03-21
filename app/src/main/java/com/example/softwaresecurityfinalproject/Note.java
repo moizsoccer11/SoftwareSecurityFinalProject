@@ -17,13 +17,13 @@ public class Note implements Serializable {
     //Note created User
     private String createdUser;
     private String key;
-    private Bitmap image;
+    private byte[] image;
 
     public Note() {
 
     }
     //New Note Constructor
-    public Note(String title, String description, String color, String createdUser, Bitmap image) {
+    public Note(String title, String description, String color, String createdUser, byte[] image) {
         this.title = title;
         this.description = description;
         this.color = color;
@@ -31,11 +31,20 @@ public class Note implements Serializable {
         this.image =image;
     }
     //Update Note
-    public Note(String title, String description, String color, Long noteID, String key) {
+    public Note(String title, String description, String color, String createdUser, long noteID, String key, byte[] image) {
         this.title = title;
         this.description = description;
         this.color = color;
-        //this.createdUser = createdUser;
+        this.createdUser = createdUser;
+        this.noteID=noteID;
+        this.key=key;
+        this.image=image;
+    }
+    public Note(String title, String description, String color, String createdUser, long noteID, String key) {
+        this.title = title;
+        this.description = description;
+        this.color = color;
+        this.createdUser = createdUser;
         this.noteID=noteID;
         this.key=key;
     }
@@ -47,6 +56,16 @@ public class Note implements Serializable {
         this.createdUser = createdUser;
         this.key=key;
     }
+    //If have image
+    public Note(String title, String description, String color, String createdUser, String key,byte[] image){
+        this.title = title;
+        this.description = description;
+        this.color = color;
+        this.createdUser = createdUser;
+        this.key=key;
+        this.image=image;
+    }
+
     // Getters and setters for color
     public String getNoteColor() {
         return color;
@@ -98,11 +117,11 @@ public class Note implements Serializable {
         this.key = key;
     }
 
-    public Bitmap getImage() {
+    public byte[] getImage() {
         return image;
     }
 
-    public void setImage(Bitmap image) {
+    public void setImage(byte[] image) {
         this.image = image;
     }
 }

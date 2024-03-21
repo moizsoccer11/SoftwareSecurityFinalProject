@@ -61,7 +61,7 @@ public class DatabaseServices {
         values.put(SQLDatabase.COLUMN_KEY, encrypt(Base64.encodeToString(noteKey.getEncoded(), Base64.NO_WRAP),convertStringKeytoSecretKey(secretKeyToEncryptKeys)));   // //Base64.encodeToString(noteKey.getEncoded(), Base64.NO_WRAP)
         //If image given than store as well
         if(note.getImage() != null){
-            values.put(SQLDatabase.COLUMN_IMAGE, bitmapToByteArray(note.getImage()));
+            values.put(SQLDatabase.COLUMN_IMAGE,imgEnc(note.getImage(),noteKey));
         }
         return database.insert(SQLDatabase.TABLE_NOTES, null, values);
     }
@@ -107,6 +107,7 @@ public class DatabaseServices {
             cursor.moveToFirst();
             while (!cursor.isAfterLast()) {
                 Note note = cursorToNote(cursor);
+                Note decrpytedNote= null;
                 //Before Adding note to List, decrypt all data
                 String secretKeyToEncryptKeys ="iFCl+uFzjeW7Dk5aId0DfX0Mykru8KeE7aNim+2FKsM=";      //"ez+oEESta+NC1k4pU4uYSSZK/DR9wfbKs/BvHSXR9Yw=";
                 //First decrypt key to decrypt rest of data
@@ -118,7 +119,12 @@ public class DatabaseServices {
                 String desc = new String(decrypt(note.getDescription(),key), StandardCharsets.UTF_8);
                 String color = new String(decrypt(note.getNoteColor(),key), StandardCharsets.UTF_8);
                 String createdBy = note.getCreatedUser();
-                Note decrpytedNote = new Note(title,desc,color,createdBy,decryptedStringKeyOfNote);
+                if(note.getImage() !=  null){
+                    byte[] imageBytes = imgDec(note.getImage(),key);
+                     decrpytedNote = new Note(title,desc,color,createdBy,note.getId(),decryptedStringKeyOfNote,imageBytes);
+                }else{
+                     decrpytedNote = new Note(title,desc,color,createdBy,note.getId(),decryptedStringKeyOfNote);
+                }
                 items.add(decrpytedNote);
                 cursor.moveToNext();
             }
@@ -126,6 +132,52 @@ public class DatabaseServices {
         }
 
         return items;
+    }
+    public List<Note> getNotesByKey(String plaintextKey) throws Exception {
+        // Encrypt the plaintext key
+        plaintextKey = plaintextKey.replaceAll("\\s", "");
+        String secretKeyToEncryptKeys = "iFCl+uFzjeW7Dk5aId0DfX0Mykru8KeE7aNim+2FKsM=";
+        SecretKey secretKey = convertStringKeytoSecretKey(secretKeyToEncryptKeys);
+        String encryptedKey = encrypt(plaintextKey, secretKey);
+
+        // Query the database for notes with the given encrypted key
+        List<Note> notes = new ArrayList<>();
+        Cursor cursor = database.query(
+                SQLDatabase.TABLE_NOTES,
+                null,
+                SQLDatabase.COLUMN_KEY + " = ?",
+                new String[]{encryptedKey},
+                null,
+                null,
+                null
+        );
+
+        if (cursor != null) {
+            cursor.moveToFirst();
+            while (!cursor.isAfterLast()) {
+                Note note = cursorToNote(cursor);
+                // Decrypt note data
+                String decryptedStringKeyOfNote = new String(decrypt(note.getKey(), secretKey), StandardCharsets.UTF_8);
+                SecretKey noteKey = convertStringKeytoSecretKey(decryptedStringKeyOfNote);
+
+                String title = new String(decrypt(note.getTitle(), noteKey), StandardCharsets.UTF_8);
+                String description = new String(decrypt(note.getDescription(), noteKey), StandardCharsets.UTF_8);
+                String noteColor = new String(decrypt(note.getNoteColor(), noteKey), StandardCharsets.UTF_8);
+                String createdBy = note.getCreatedUser();
+                byte[] image = null;
+
+                if (note.getImage() != null) {
+                    image = imgDec(note.getImage(), noteKey);
+                }
+
+                Note decryptedNote = new Note(title, description, noteColor, createdBy, note.getId(), decryptedStringKeyOfNote, image);
+                notes.add(decryptedNote);
+                cursor.moveToNext();
+            }
+            cursor.close();
+        }
+
+        return notes;
     }
 
     //Function to insert new userdetails into database
@@ -158,6 +210,7 @@ public class DatabaseServices {
         note.setDescription(cursor.getString(cursor.getColumnIndex(SQLDatabase.COLUMN_DESCRIPTION)));
         note.setNoteColor(cursor.getString(cursor.getColumnIndex(SQLDatabase.COLUMN_NOTECOLOR)));
         note.setKey(cursor.getString(cursor.getColumnIndex(SQLDatabase.COLUMN_KEY)));
+        note.setImage(cursor.getBlob(cursor.getColumnIndex(SQLDatabase.COLUMN_IMAGE)));
         return note;
     }
 

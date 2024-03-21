@@ -75,7 +75,7 @@ public class MainActivity extends AppCompatActivity {
             recyclerView.setVisibility(View.VISIBLE);
             noItemsTextView.setVisibility(View.GONE);
             // Initialize Adapter
-            Adapter adapter = new Adapter(MainActivity.this,noteItemList);
+            Adapter adapter = new Adapter(MainActivity.this,noteItemList, user);
             recyclerView.setAdapter(adapter);
         }
 
@@ -100,6 +100,7 @@ public class MainActivity extends AppCompatActivity {
                     Intent intent;
                     if (item.getItemId() == R.id.action_home) {
                         // Do Nothing since already on this page
+
                         return true;
                     } else if (item.getItemId() == R.id.action_shared) {
                         finish();
