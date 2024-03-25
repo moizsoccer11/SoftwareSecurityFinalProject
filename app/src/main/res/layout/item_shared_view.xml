@@ -29,7 +29,7 @@
     </TextView>
 
     <ImageView
-        android:id="@+id/deleteBtn"
+        android:id="@+id/viewBtn"
         android:layout_width="86dp"
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"

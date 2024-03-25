@@ -133,12 +133,19 @@ public class DatabaseServices {
 
         return items;
     }
+    /*
     public List<Note> getNotesByKey(String plaintextKey) throws Exception {
         // Encrypt the plaintext key
         plaintextKey = plaintextKey.replaceAll("\\s", "");
         String secretKeyToEncryptKeys = "iFCl+uFzjeW7Dk5aId0DfX0Mykru8KeE7aNim+2FKsM=";
         SecretKey secretKey = convertStringKeytoSecretKey(secretKeyToEncryptKeys);
-        String encryptedKey = encrypt(plaintextKey, secretKey);
+        String encryptedKey = encryptInputKey(plaintextKey);
+
+        Log.w("Key",encryptedKey);
+        Log.w("Key",encryptedKey);
+        Log.w("Key",encryptedKey);Log.w("Key",encryptedKey);Log.w("Key",encryptedKey);Log.w("Key",encryptedKey);Log.w("Key",encryptedKey);
+        Log.w("Key",encryptedKey);Log.w("Key",encryptedKey);
+        Log.w("Key",encryptedKey);Log.w("Key",encryptedKey);
 
         // Query the database for notes with the given encrypted key
         List<Note> notes = new ArrayList<>();
@@ -178,7 +185,53 @@ public class DatabaseServices {
         }
 
         return notes;
+    }*/
+    public List<Note> getNotesByKey(String plaintextKey) throws Exception {
+        // Encrypt the input key
+        plaintextKey = plaintextKey.trim(); // Trim any leading or trailing whitespace
+        String secretKeyToEncryptKeys = "iFCl+uFzjeW7Dk5aId0DfX0Mykru8KeE7aNim+2FKsM=";
+        SecretKey secretKey = convertStringKeytoSecretKey(secretKeyToEncryptKeys);
+        // Query the database for notes with the decrypted key
+        List<Note> notes = new ArrayList<>();
+        Cursor cursor = database.query(
+                SQLDatabase.TABLE_NOTES,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null
+        );
+
+        if (cursor != null) {
+            cursor.moveToFirst();
+            while (!cursor.isAfterLast()) {
+                Note note = cursorToNote(cursor);
+                // Decrypt the key stored in the database
+                String decryptedStringKeyOfNote = new String(decrypt(note.getKey(), secretKey), StandardCharsets.UTF_8);
+                // Compare the decrypted key with the inputted key
+                if (decryptedStringKeyOfNote.equals(plaintextKey)) {
+                    // If the keys match, decrypt the rest of the note data
+                    SecretKey noteKey = convertStringKeytoSecretKey(decryptedStringKeyOfNote);
+                    String title = new String(decrypt(note.getTitle(), noteKey), StandardCharsets.UTF_8);
+                    String description = new String(decrypt(note.getDescription(), noteKey), StandardCharsets.UTF_8);
+                    String noteColor = new String(decrypt(note.getNoteColor(), noteKey), StandardCharsets.UTF_8);
+                    String createdBy = note.getCreatedUser();
+                    byte[] image = null;
+                    if (note.getImage() != null) {
+                        image = imgDec(note.getImage(), noteKey);
+                    }
+                    Note decryptedNote = new Note(title, description, noteColor, createdBy, note.getId(), decryptedStringKeyOfNote, image);
+                    notes.add(decryptedNote);
+                }
+                cursor.moveToNext();
+            }
+            cursor.close();
+        }
+
+        return notes;
     }
+
 
     //Function to insert new userdetails into database
     public long signUpNewUser(User user) {
@@ -290,4 +343,18 @@ public class DatabaseServices {
         bm.compress(Bitmap.CompressFormat.PNG, 100, stream);
         return stream.toByteArray();
     }
+    //Function to encrpyt the inputted token key
+    public String encryptInputKey(String inputKey) throws Exception {
+        // Decode the input key from Base64
+
+        // Hardcoded secret key
+        String secretKeyToEncryptKeys = "iFCl+uFzjeW7Dk5aId0DfX0Mykru8KeE7aNim+2FKsM=";
+        SecretKey secretKey = convertStringKeytoSecretKey(secretKeyToEncryptKeys);
+
+        // Encrypt the input key
+        String encryptedKey = encrypt(inputKey, secretKey);
+
+        return encryptedKey;
+    }
+
 }

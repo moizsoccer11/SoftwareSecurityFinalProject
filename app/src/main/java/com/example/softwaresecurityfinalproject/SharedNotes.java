@@ -88,7 +88,7 @@ public class SharedNotes extends AppCompatActivity {
             try{
                 //Get entered token
                 EditText tokenInput = enterTokenModal.findViewById(R.id.tokenInput);
-                String tokenText=  tokenInput.toString();
+                String tokenText=  tokenInput.getText().toString().trim();
                 //Open Database to access
                 try {
                     //Add items to list
@@ -119,7 +119,7 @@ public class SharedNotes extends AppCompatActivity {
                     recyclerView.setVisibility(View.VISIBLE);
                     noItemsTextView.setVisibility(View.GONE);
                     // Initialize Adapter
-                    Adapter adapter = new Adapter(SharedNotes.this,sharedNotesList, user);
+                    SharedNotesAdapter adapter = new SharedNotesAdapter(SharedNotes.this,sharedNotesList, user);
                     recyclerView.setAdapter(adapter);
                     // Dismiss the dialog
                     dialog.dismiss();

@@ -87,7 +87,7 @@ public class MainActivity extends AppCompatActivity {
         startActivity(intent);
     }
     //Logout Function
-    public void logOutOnClick(){
+    public void logOutOnClick(View view){
         finish();
         Intent intent = new Intent(MainActivity.this, LoginActivity.class);
         startActivity(intent);

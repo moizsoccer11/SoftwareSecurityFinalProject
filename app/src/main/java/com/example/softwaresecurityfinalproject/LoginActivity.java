@@ -46,6 +46,7 @@ public class LoginActivity extends FragmentActivity {
             //Make a toast since user exists
             Toast.makeText(getApplicationContext(),"Welcome " + usernameText, Toast.LENGTH_SHORT).show();
             //Transfer the user to Main Page
+            finish();
             Intent intent = new Intent(LoginActivity.this, MainActivity.class);
             intent.putExtra("user_object", user);
             startActivity(intent);
